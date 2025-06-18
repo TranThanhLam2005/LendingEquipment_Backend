@@ -1,0 +1,26 @@
+{
+  "name": "lending_system",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TranThanhLam2005/LendingBook_Backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TranThanhLam2005/LendingBook_Backend/issues"
+  },
+  "homepage": "https://github.com/TranThanhLam2005/LendingBook_Backend#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "express-validator": "^7.2.1",
+    "postgres": "^3.4.7"
+  }
+}
