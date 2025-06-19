@@ -6,8 +6,13 @@ const visitorRoutes = require('./routes/visitorRoutes');
 const authRoutes = require('./routes/authRoutes');
 
 
+
 // Middleware
-app.use(cors()); // Enable CORS for all routes
+app.use(cors({
+    origin: 'http://localhost:5173', // or your frontend URL
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+}));
 app.use(express.json()); // Parse JSON request bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded request bodies
 

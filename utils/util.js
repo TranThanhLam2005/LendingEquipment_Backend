@@ -1,14 +1,33 @@
-function hashString(string) {
-  return bcrypt.hashSync(
-    string,
-    process.env.SALT_ROUNDS
-  );
+const crypto = require("crypto");
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+
+
+function hashPassword(password) {
+  bcrypt.hash(password, saltRounds, function(err, hash) {
+    return {error: err, hash: hash};
+  })
+};
+
+async function comparePassword(Password, storedHash) {
+  try {
+      const match = await bcrypt.compare(Password, storedHash);
+      return { match };
+  } catch (err) {
+      return { match: false, err };
+  }
 }
 
-function compareHash(string, hash) {
-  return bcrypt.compareSync(
-    string,
-    hash
-  );
+
+function generateSessionID() {
+  return crypto.randomBytes(32).toString("hex");
 }
+
+module.exports = {
+  hashPassword,
+  comparePassword,
+  generateSessionID
+};
+
+
 
