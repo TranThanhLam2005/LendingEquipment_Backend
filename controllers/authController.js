@@ -11,19 +11,16 @@ const login = async (req, res) => {
     try {
         const { token, role } = await authService.login(Username, Password);
         
-        // ✅ Set the token as an HTTP-only cookie
-        res.cookie('session_token', token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'Strict',
-        maxAge: 24 * 60 * 60 * 1000, // 1 day
+        // For dev:
+        res.cookie('token', token, {
+            httpOnly: true,
+            maxAge: 3600 * 1000,
         });
-    
+          
         res.status(200).json({role, message: 'Login successful'});
-        
     } catch (err) {
-        console.error(err.message);
-        res.status(401).json({ error: err.message });
+        const status = err.statusCode || 500; // Default to 500 if no status code is set
+        return res.status(status).json({ error: err.message });
     }
 };
 
@@ -46,8 +43,7 @@ const login = async (req, res) => {
 
 
 const verifySession = async (req, res) => {
-    const { SessionID } = req.body;
-
+    const SessionID = req.cookies.token;
     // Validate request body
     if (!SessionID) {
         return res.status(400).json({ error: 'SessionID is required' });

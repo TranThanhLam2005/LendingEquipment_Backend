@@ -7,12 +7,16 @@ const login = async (Username, Password) => {
     const user = await userModel.getUserByUsername(Username);
     // Check if user exists
     if (user.length === 0) {
-        throw new Error('User not found');
+        const error = new Error('User not found');
+        error.statusCode = 404; // Not Found
+        throw error;
     }
 
     const compare = await utils.comparePassword(Password, user[0].Password);
     if (compare.match === false) {
-        throw new Error('Invalid password');
+        const error = new Error('Incorrect password');
+        error.statusCode = 401; // Unauthorized
+        throw error;
     }
 
     // Generate token and role
