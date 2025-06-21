@@ -27,6 +27,19 @@ const login = async (Username, Password) => {
     return { token, role };
 }
 
+const logout = async (SessionID) => {
+    // Validate SessionID
+    if (!SessionID) {
+        throw new Error('SessionID is required');
+    }
+
+    // Delete session
+    const result = await userModel.inActiveSession(SessionID);
+    if (result.length === 0) {
+        throw new Error('Session not found or already inactive');
+    }
+}
+
 // const register = async (Username, Password, Role) => {
 //     // Hash the password
 //     const hashedPassword = utils.hashString(Password);
@@ -51,5 +64,6 @@ const verifySession = async (SessionID) => {
 
 module.exports = {
     login,
+    logout,
     verifySession
 };

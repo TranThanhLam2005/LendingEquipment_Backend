@@ -34,6 +34,18 @@ const addSession = async (SessionID, UserID) => {
     `;
 };
 
+const inActiveSession = async (SessionID) => {
+    if (!SessionID) {
+        throw new Error('SessionID is undefined');
+    }
+    return await sql`
+        UPDATE "Production"."Sessions"
+        SET "IsActive" = FALSE
+        WHERE "SessionID" = ${SessionID}
+        RETURNING *;
+    `;
+};
+
 const verifySession = async (SessionID) => {
     const result =  await sql`
         SELECT * FROM "Production"."Sessions"
@@ -72,5 +84,6 @@ module.exports = {
     getUserByUsername,
     addUser, 
     addSession,
-    verifySession
+    inActiveSession,
+    verifySession,
 };

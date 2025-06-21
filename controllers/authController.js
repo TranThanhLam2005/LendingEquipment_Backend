@@ -24,6 +24,22 @@ const login = async (req, res) => {
     }
 };
 
+const logout = async (req, res) => {
+    const SessionID = req.cookies.token;
+
+    // Validate SessionID
+    if (!SessionID) {
+        return res.status(400).json({ error: 'SessionID is required' });
+    }
+    try {
+        await authService.logout(SessionID);
+        res.clearCookie('token');
+        res.status(200).json({ message: 'Logout successful' });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: err.message });
+    }
+}
 // const register = async (req, res) => {
 //     const { Username, Password, Role } = req.body;
 
@@ -58,4 +74,4 @@ const verifySession = async (req, res) => {
     }
 };
 
-module.exports = { login, verifySession };
+module.exports = { login, verifySession, logout };
