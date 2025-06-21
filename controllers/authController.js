@@ -56,8 +56,6 @@ const logout = async (req, res) => {
 //         res.status(500).json({ error: err.message });
 //     }
 // };
-
-
 const verifySession = async (req, res) => {
     const SessionID = req.cookies.token;
     // Validate request body
@@ -74,4 +72,6 @@ const verifySession = async (req, res) => {
     }
 };
 
-module.exports = { login, verifySession, logout };
+
+
+module.exports = { login, logout, verifySession };

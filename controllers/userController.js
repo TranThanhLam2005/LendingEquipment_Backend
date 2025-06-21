@@ -1,8 +1,17 @@
-const User = require('../models/userModel');
+const userModel = require('../models/userModel');
 
-exports.getAllUsers = (req, res) => {
-    User.find({}, (err, users) => {
-        if (err) return res.status(500).send('Error retrieving users');
-        res.status(200).json(users);
-    });
-};
+const getParticipantCourses = async (req, res) => {
+    const SessionID = req.cookies.token;
+
+    try {
+        const courses = await userModel.getParticipantCourses(SessionID);
+        res.status(200).json(courses);
+    } catch (err) {
+        console.error('Error fetching participant courses:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}
+
+module.exports = {
+    getParticipantCourses
+}

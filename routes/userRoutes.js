@@ -1,9 +1,10 @@
 const express = require('express');
-const Router = express.Router();
 const userController = require('../controllers/userController');
+const middleware = require('../middleware/middleware');
+const router = express.Router();
 
 // Routes for user operations
-router.get('/users', userController.getAllUsers);
+router.get('/get_participant_courses',middleware.verifySessionMiddleware, userController.getParticipantCourses);
 
 // export the router
-module.exports = Router;
+module.exports = router;

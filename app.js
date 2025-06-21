@@ -6,11 +6,12 @@ const cookieParser = require('cookie-parser');
 const app = express();
 const visitorRoutes = require('./routes/visitorRoutes');
 const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 
 // Middleware
 app.use(cors({
-    origin: 'http://192.168.1.8:5173', // or your frontend URL
+    origin: 'http://192.168.1.12:5173', // or your frontend URL
     credentials: true,
 }));
 app.use(cookieParser()); // Parse cookies
@@ -25,6 +26,7 @@ app.get('/', (req, res) => {
 // Routes
 app.use('/visitor', visitorRoutes);
 app.use('/auth', authRoutes);
+app.use('/user', userRoutes); 
 
 // Export the app   
 module.exports = app;

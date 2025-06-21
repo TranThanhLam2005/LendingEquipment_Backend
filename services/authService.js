@@ -1,5 +1,6 @@
 const utils = require('../utils/util');
 const userModel = require('../models/userModel');
+const sessionModel = require('../models/sessionModel');
 
 // login service
 const login = async (Username, Password) => {
@@ -21,7 +22,7 @@ const login = async (Username, Password) => {
 
     // Generate token and role
     const token = utils.generateSessionID();
-    await userModel.addSession(token, user[0].CitizenID);
+    await sessionModel.addSession(token, user[0].CitizenID);
     const role = user[0].Role;
 
     return { token, role };
@@ -34,7 +35,7 @@ const logout = async (SessionID) => {
     }
 
     // Delete session
-    const result = await userModel.inActiveSession(SessionID);
+    const result = await sessionModel.inActiveSession(SessionID);
     if (result.length === 0) {
         throw new Error('Session not found or already inactive');
     }
@@ -56,7 +57,7 @@ const logout = async (SessionID) => {
 
 const verifySession = async (SessionID) => {
     // Verify session
-    const session = await userModel.verifySession(SessionID);
+    const session = await sessionModel.verifySession(SessionID);
     if (session.length === 0) {
         throw new Error('Session is expired or invalid');
     }
