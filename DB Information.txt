@@ -1,0 +1,100 @@
+// Table creation
+CREATE TABLE "Production"."User" (
+    "CitizenID" TEXT PRIMARY KEY,
+    "Username" TEXT NOT NULL UNIQUE,
+    "FullName" TEXT NOT NULL,
+    "Password" TEXT NOT NULL,
+    "Email" TEXT NOT NULL UNIQUE,
+    "PhoneNumber" TEXT NOT NULL UNIQUE,
+    "Birthday" DATE,
+    "Role" TEXT CHECK ("Role" IN ('student', 'professional', 'academic_staff')) NOT NULL,
+    "Pfp" BYTEA
+);
+                
+
+CREATE TABLE "Production"."Student" (
+  "CitizenID" TEXT PRIMARY KEY REFERENCES "Production"."User"("CitizenID") ON DELETE CASCADE,
+  "StudentID" TEXT NOT NULL UNIQUE
+);
+
+
+CREATE TABLE "Production"."Professional" (
+  "CitizenID" TEXT PRIMARY KEY REFERENCES "Production"."User"("CitizenID") ON DELETE CASCADE,
+  "StaffID" TEXT NOT NULL UNIQUE,
+  "Job" TEXT NOT NULL
+);
+
+
+CREATE TABLE "Production"."AcademicStaff" (
+  "CitizenID" TEXT PRIMARY KEY REFERENCES "Production"."User"("CitizenID") ON DELETE CASCADE,
+  "StaffID" TEXT NOT NULL UNIQUE
+);
+
+
+CREATE TABLE "Production"."Equipment" (
+    "ID" TEXT PRIMARY KEY,
+    "Name" TEXT NOT NULL,
+    "Status" TEXT  NOT NULL,
+    "Type" TEXT NOT NULL,
+    "Date Available" DATE,
+    "PurchaseDate" DATE,
+    "Description" TEXT NOT NULL,
+    "Condition" TEXT NOT NULL,
+    "Venue" TEXT NOT NULL
+);
+
+
+CREATE TABLE "Production"."LendingRecord" (
+    "ID" TEXT PRIMARY KEY,
+    "BorrowerID" TEXT NOT NULL,
+    "SuperviseID" TEXT,
+    "EquipmentID" TEXT,
+    "BorrowDate" DATE NOT NULL,
+    "ReturnDate" DATE NOT NULL,
+    "Purpose" TEXT NOT NULL,
+    "Status" TEXT NOT NULL,
+    FOREIGN KEY ("BorrowerID") REFERENCES "Production"."Student"("StudentID"),
+    FOREIGN KEY ("BorrowerID") REFERENCES "Production"."AcademicStaff"("StaffID"),
+    FOREIGN KEY ("BorrowerID") REFERENCES "Production"."Professional"("StaffID"),
+    FOREIGN KEY ("SuperviseID") REFERENCES "Production"."AcademicStaff"("StaffID"),
+    FOREIGN KEY ("EquipmentID") REFERENCES "Production"."Equipment"("ID")
+);
+
+
+CREATE TABLE "Production"."Sessions" (
+    "SessionID"   TEXT PRIMARY KEY,         
+    "User_ID"      TEXT NOT NULL,           
+    "CreateAt"   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  
+    "LastActive"  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  
+    "IsActive"    BOOLEAN DEFAULT TRUE,    
+    FOREIGN KEY ("User_ID" ) REFERENCES "Production"."User"("CitizenID") ON DELETE CASCADE
+);
+
+
+CREATE TABLE "Production"."Course" (
+  "CourseID" TEXT PRIMARY KEY,
+  "CourseName" TEXT NOT NULL,
+  "AcademicStaffID" TEXT NOT NULL,
+  "DateStart" DATE NOT NULL,
+  "DateEnd" DATE NOT NULL,
+  "LectureDate" TEXT NOT NULL,
+  "Room" TEXT NOT NULL,
+  "Description" TEXT NOT NULL,
+  FOREIGN KEY ("AcademicStaffID") REFERENCES "Production"."AcademicStaff"("StaffID")
+)
+
+
+CREATE TABLE "Production"."CourseManagement" (
+  "CourseID" TEXT NOT NULL,
+  "StudentID" TEXT NOT NULL,
+  PRIMARY KEY ("CourseID", "StudentID"),
+  FOREIGN KEY ("CourseID") REFERENCES "Production"."Course"("CourseID"),
+  FOREIGN KEY ("StudentID") REFERENCES "Production"."Student"("StudentID")
+);
+
+
+CREATE TABLE "Production"."EquipmentManagement" (
+  "CourseName" TEXT NOT NULL,
+  "EquipmentName" TEXT NOT NULL,
+  PRIMARY KEY ("CourseName", "EquipmentName")
+);

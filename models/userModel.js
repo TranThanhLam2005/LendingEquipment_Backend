@@ -34,9 +34,59 @@ const getParticipantCourses = async (SessionID) => {
     `;
 }
 
+const getCourseDetail = async (CourseID) => {
+    if (!CourseID) {
+        throw new Error('CourseID is undefined');
+    }
+
+    const result = await sql`
+        SELECT
+            c."CourseID",
+            c."CourseName",
+            c."DateStart",
+            c."DateEnd",
+            c."LectureDate",
+            c."Room",
+            c."Description",
+            u."FullName" AS "AcademicStaffName",
+
+            json_agg(
+                DISTINCT jsonb_build_object(
+                    'Name', e."Name",
+                    'Status', e."Status",
+                    'PurchaseDate', e."PurchaseDate",
+                    'Condition', e."Condition",
+                    'Type', e."Type"
+                )
+            ) AS "Equipments",
+
+            json_agg(
+                DISTINCT su."FullName"
+            ) AS "StudentNames"
+
+        FROM "Production"."Course" c
+        JOIN "Production"."AcademicStaff" a ON c."AcademicStaffID" = a."StaffID"
+        JOIN "Production"."User" u ON a."CitizenID" = u."CitizenID"
+        JOIN "Production"."CourseManagement" cm ON c."CourseID" = cm."CourseID"
+        JOIN "Production"."Student" s ON cm."StudentID" = s."StudentID"
+        JOIN "Production"."User" su ON s."CitizenID" = su."CitizenID"
+        JOIN "Production"."EquipmentManagement" em ON em."CourseName" = c."CourseName"
+        JOIN "Production"."Equipment" e ON em."EquipmentName" = e."Name"
+
+        WHERE c."CourseID" = ${CourseID}
+
+        GROUP BY
+            c."CourseID", c."CourseName", c."DateStart", c."DateEnd", c."LectureDate",
+            c."Room", c."Description", u."FullName";
+    `;
+
+    return result[0];
+};
+
 
 module.exports = {
     getUserByUsername,
     addUser, 
-    getParticipantCourses
+    getParticipantCourses,
+    getCourseDetail
 };
