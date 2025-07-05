@@ -88,5 +88,5 @@ module.exports = {
     getUserByUsername,
     addUser, 
     getParticipantCourses,
-    getCourseDetail
+    getCourseDetail,
 };

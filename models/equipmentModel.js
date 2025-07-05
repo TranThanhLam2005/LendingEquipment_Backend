@@ -114,6 +114,17 @@ const queryEquipmentByParticipantCourse =
     `;
   };
 
+const getEquipmentDetail = async (equipmentID) => {
+  if (!equipmentID) {
+    throw new Error("EquipmentID is undefined or invalid");
+  }
+  return await sql`
+    SELECT * FROM "Production"."Equipment"
+    WHERE "ID" = ${equipmentID}
+  `;
+}
+
+
 const queryTest = async () => {
   return await sql`
     SELECT s."SessionID", u."FullName", st."StudentID"
