@@ -8,6 +8,18 @@ const getUserByUsername = async (Username) => {
     `;
 }
 
+const getUserBySessionID = async (SessionID) => {
+    if (!SessionID) {
+        throw new Error('SessionID is undefined');
+    }
+    const result = await sql`
+        SELECT "User"."Username", "User"."FullName", "User"."Role"
+        FROM "Production"."User"
+        JOIN "Production"."Sessions" ON "Production"."User"."CitizenID" = "Production"."Sessions"."User_ID"
+        WHERE "Production"."Sessions"."SessionID" = ${SessionID}
+    `;
+    return result[0]; 
+}
 
 // add new user
 const addUser = async (Username, Password, Role) => {
@@ -86,6 +98,7 @@ const getCourseDetail = async (CourseID) => {
 
 module.exports = {
     getUserByUsername,
+    getUserBySessionID,
     addUser, 
     getParticipantCourses,
     getCourseDetail,

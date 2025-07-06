@@ -118,10 +118,11 @@ const getEquipmentDetail = async (equipmentID) => {
   if (!equipmentID) {
     throw new Error("EquipmentID is undefined or invalid");
   }
-  return await sql`
+  const result = await sql`
     SELECT * FROM "Production"."Equipment"
-    WHERE "ID" = ${equipmentID}
+    WHERE "Equipment"."ID" = ${equipmentID}
   `;
+  return result[0];
 }
 
 
@@ -140,4 +141,5 @@ module.exports = {
   queryTest,
   getEquipmentByParticipantCourse,
   queryEquipmentByParticipantCourse,
+  getEquipmentDetail,
 };

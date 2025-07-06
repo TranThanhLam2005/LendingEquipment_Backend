@@ -22,11 +22,15 @@ async function comparePassword(Password, storedHash) {
 function generateSessionID() {
   return crypto.randomBytes(32).toString("hex");
 }
+function generateMessageID() {
+  return crypto.randomBytes(16).toString("hex");
+}
 
 module.exports = {
   hashPassword,
   comparePassword,
-  generateSessionID
+  generateSessionID,
+  generateMessageID
 };
 
 

@@ -18,6 +18,7 @@
   "homepage": "https://github.com/TranThanhLam2005/LendingBook_Backend#readme",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "cookie": "^1.0.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
