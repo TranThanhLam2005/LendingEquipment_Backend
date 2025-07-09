@@ -114,17 +114,75 @@ const queryEquipmentByParticipantCourse =
     `;
   };
 
-const getEquipmentDetail = async (equipmentID) => {
-  if (!equipmentID) {
-    throw new Error("EquipmentID is undefined or invalid");
-  }
-  const result = await sql`
-    SELECT * FROM "Production"."Equipment"
-    WHERE "Equipment"."ID" = ${equipmentID}
-  `;
-  return result[0];
-}
+  const getEquipmentDetail = async (equipmentID) => {
+    if (!equipmentID) {
+      throw new Error("EquipmentID is undefined or invalid");
+    }
+  
+    const result = await sql`
+      SELECT 
+        "Equipment"."ID",
+        "Equipment"."Name",
+        "Equipment"."Status",
+        "Equipment"."PurchaseDate",
+        "Equipment"."Condition",
+        "Equipment"."Type",
+        "Equipment"."Date Available",
+        "Equipment"."Description",
+        "Equipment"."Venue",
+        "GroupChat"."Content",
+        "GroupChat"."CreateAt",
+        "User"."FullName",
+        "User"."Username",
+        "User"."Role"
+      FROM "Production"."Equipment"
+      LEFT JOIN "Production"."GroupChat" 
+        ON "Equipment"."ID" = "GroupChat"."GroupID"
+      LEFT JOIN "Production"."User" 
+        ON "GroupChat"."CitizenID" = "User"."CitizenID"
+      WHERE "Equipment"."ID" = ${equipmentID}
+    `;
+  
+    if (result.length === 0) return null;
+  
+    // Take shared equipment data from first row
+    const {
+      ID,
+      Name,
+      Status,
+      PurchaseDate,
+      Condition,
+      Type,
+      'Date Available': DateAvailable,
+      Description,
+      Venue,
+    } = result[0];
+  
+    // Map chat messages to sender objects
+    const historyComments = result
+    .filter(row => row.Content !== null) // Only map rows that have messages
+    .map(row => ({
+      userName: row.Username,
+      role: row.Role,
+      fullName: row.FullName,
+      createAt: row.CreateAt,
+      content: row.Content,
+    }));
 
+  
+    return {
+      ID,
+      Name,
+      Status,
+      PurchaseDate,
+      Condition,
+      Type,
+      DateAvailable,
+      Description,
+      Venue,
+      historyComments
+    };
+  };
 
 const queryTest = async () => {
   return await sql`
