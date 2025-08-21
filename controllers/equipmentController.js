@@ -36,11 +36,13 @@ const queryEquipmentByParticipantCourse = async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 }
+
 const getEquipmentDetail = async (req, res) => {
     const equipmentID = req.params.equipmentID;
-
+    const SessionID = req.cookies.token;
+    
     try {
-        const equipmentDetail = await equipmentModel.getEquipmentDetail(equipmentID);
+        const equipmentDetail = await equipmentModel.getEquipmentDetail(equipmentID, SessionID);
         if (!equipmentDetail) {
             return res.status(404).json({ error: 'Equipment not found' });
         }

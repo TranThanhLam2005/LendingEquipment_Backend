@@ -114,9 +114,12 @@ const queryEquipmentByParticipantCourse =
     `;
   };
 
-  const getEquipmentDetail = async (equipmentID) => {
+  const getEquipmentDetail = async (equipmentID, SessionID) => {
     if (!equipmentID) {
       throw new Error("EquipmentID is undefined or invalid");
+    }
+    if (!SessionID) {
+      throw new Error("SessionID is undefined or invalid");
     }
   
     const result = await sql`
@@ -134,12 +137,26 @@ const queryEquipmentByParticipantCourse =
         "GroupChat"."CreateAt",
         "User"."FullName",
         "User"."Username",
-        "User"."Role"
+        "User"."Role", 
+        "AcademicStaffUser"."FullName" AS "AcademicStaffName",
+        "CurrentUser"."FullName" AS "CurrentUserName"
       FROM "Production"."Equipment"
       LEFT JOIN "Production"."GroupChat" 
         ON "Equipment"."ID" = "GroupChat"."GroupID"
       LEFT JOIN "Production"."User" 
         ON "GroupChat"."CitizenID" = "User"."CitizenID"
+      LEFT JOIN "Production"."EquipmentManagement"
+        ON "Equipment"."Name" = "EquipmentManagement"."EquipmentName"
+      LEFT JOIN "Production"."Course"
+        ON "EquipmentManagement"."CourseName" = "Course"."CourseName"
+      LEFT JOIN "Production"."AcademicStaff"
+        ON "Course"."AcademicStaffID" = "AcademicStaff"."StaffID"
+      LEFT JOIN "Production"."User" AS "AcademicStaffUser"
+        ON "AcademicStaff"."CitizenID" = "AcademicStaffUser"."CitizenID"
+      LEFT JOIN "Production"."Sessions"
+        ON "Sessions"."SessionID" = ${SessionID}
+      LEFT JOIN "Production"."User" AS "CurrentUser"
+        ON "Sessions"."User_ID" = "CurrentUser"."CitizenID"
       WHERE "Equipment"."ID" = ${equipmentID}
     `;
   
@@ -156,18 +173,24 @@ const queryEquipmentByParticipantCourse =
       'Date Available': DateAvailable,
       Description,
       Venue,
+      AcademicStaffName,
+      CurrentUserName,
     } = result[0];
   
     // Map chat messages to sender objects
-    const historyComments = result
-    .filter(row => row.Content !== null) // Only map rows that have messages
-    .map(row => ({
-      userName: row.Username,
-      role: row.Role,
-      fullName: row.FullName,
-      createAt: row.CreateAt,
-      content: row.Content,
-    }));
+    const historyComments = Array.from(
+      new Map(
+        result
+          .filter(row => row.Content !== null)
+          .map(row => [`${row.Username}-${row.CreateAt}`, {
+            userName: row.Username,
+            role: row.Role,
+            fullName: row.FullName,
+            createAt: row.CreateAt,
+            content: row.Content,
+          }])
+      ).values()
+    );
 
   
     return {
@@ -180,6 +203,8 @@ const queryEquipmentByParticipantCourse =
       DateAvailable,
       Description,
       Venue,
+      AcademicStaffName,
+      CurrentUserName,
       historyComments
     };
   };
