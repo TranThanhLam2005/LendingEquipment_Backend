@@ -11,7 +11,7 @@ const userRoutes = require('./routes/userRoutes');
 
 // Middleware
 app.use(cors({
-    origin: 'http://192.168.1.6:5173', // or your frontend URL
+    origin: 'http://192.168.1.126:5173', // or your frontend URL
     credentials: true,
 }));
 app.use(cookieParser()); // Parse cookies
