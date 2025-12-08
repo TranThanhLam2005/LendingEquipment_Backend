@@ -1,14 +1,7 @@
 const postgres = require("postgres");
-const sql = postgres(
-  process.env.DATABASE_URL,
-  { ssl: "require" }
-);
+const sql = postgres(process.env.DATABASE_URL, {ssl: "require"});
 
-const queryAllEquipments = async (
-  searchValue,
-  searchStatus,
-  searchOrder
-) => {
+const queryAllEquipments = async (searchValue, searchStatus, searchOrder) => {
   return await sql`
         SELECT * FROM "Production"."Equipment"
         WHERE ${
@@ -17,9 +10,7 @@ const queryAllEquipments = async (
             : sql`TRUE`
         }
         AND ${
-          searchStatus ===
-            "Available" ||
-          searchStatus === "Borrowed"
+          searchStatus === "Available" || searchStatus === "Borrowed"
             ? sql`"Status" = ${searchStatus}`
             : sql`TRUE`
         }
@@ -33,14 +24,11 @@ const queryAllEquipments = async (
     `;
 };
 
-const getEquipmentByParticipantCourse =
-  async (sessionID) => {
-    if (!sessionID) {
-      throw new Error(
-        "SessionID is undefined or invalid"
-      );
-    }
-    return await sql`
+const getEquipmentByParticipantCourse = async (sessionID) => {
+  if (!sessionID) {
+    throw new Error("SessionID is undefined or invalid");
+  }
+  return await sql`
         SELECT
             "Equipment"."ID",
             "Equipment"."Name",
@@ -58,24 +46,17 @@ const getEquipmentByParticipantCourse =
         WHERE "Sessions"."SessionID" = ${sessionID}
         ORDER BY "Sessions"."SessionID"
     `;
-  };
+};
 
-const queryEquipmentByParticipantCourse =
-  async (
-    sessionID,
-    {
-      searchValue = "",
-      searchStatus = "",
-      searchOrder = "",
-    } = {}
-  ) => {
-    if (!sessionID) {
-      throw new Error(
-        "SessionID is undefined or invalid"
-      );
-    }
+const queryEquipmentByParticipantCourse = async (
+  sessionID,
+  {searchValue = "", searchStatus = "", searchOrder = ""} = {}
+) => {
+  if (!sessionID) {
+    throw new Error("SessionID is undefined or invalid");
+  }
 
-    return await sql`
+  return await sql`
       SELECT
           e."ID",
           e."Name",
@@ -98,9 +79,7 @@ const queryEquipmentByParticipantCourse =
             : sql`TRUE`
         }
         AND ${
-          searchStatus ===
-            "Available" ||
-          searchStatus === "Borrowed"
+          searchStatus === "Available" || searchStatus === "Borrowed"
             ? sql`e."Status" = ${searchStatus}`
             : sql`TRUE`
         }
@@ -112,17 +91,17 @@ const queryEquipmentByParticipantCourse =
           : sql`e."ID"`
       }
     `;
-  };
+};
 
-  const getEquipmentDetail = async (equipmentID, SessionID) => {
-    if (!equipmentID) {
-      throw new Error("EquipmentID is undefined or invalid");
-    }
-    if (!SessionID) {
-      throw new Error("SessionID is undefined or invalid");
-    }
-  
-    const result = await sql`
+const getEquipmentDetail = async (equipmentID, SessionID) => {
+  if (!equipmentID) {
+    throw new Error("EquipmentID is undefined or invalid");
+  }
+  if (!SessionID) {
+    throw new Error("SessionID is undefined or invalid");
+  }
+
+  const result = await sql`
       SELECT 
         "Equipment"."ID",
         "Equipment"."Name",
@@ -139,6 +118,7 @@ const queryEquipmentByParticipantCourse =
         "User"."Username",
         "User"."Role", 
         "AcademicStaffUser"."FullName" AS "AcademicStaffName",
+        "AcademicStaffUser"."CitizenID" AS "AcademicStaffCitizenID",
         "CurrentUser"."FullName" AS "CurrentUserName"
       FROM "Production"."Equipment"
       LEFT JOIN "Production"."GroupChat" 
@@ -159,56 +139,68 @@ const queryEquipmentByParticipantCourse =
         ON "Sessions"."User_ID" = "CurrentUser"."CitizenID"
       WHERE "Equipment"."ID" = ${equipmentID}
     `;
-  
-    if (result.length === 0) return null;
-  
-    // Take shared equipment data from first row
-    const {
-      ID,
-      Name,
-      Status,
-      PurchaseDate,
-      Condition,
-      Type,
-      'Date Available': DateAvailable,
-      Description,
-      Venue,
-      AcademicStaffName,
-      CurrentUserName,
-    } = result[0];
-  
-    // Map chat messages to sender objects
-    const historyComments = Array.from(
-      new Map(
-        result
-          .filter(row => row.Content !== null)
-          .map(row => [`${row.Username}-${row.CreateAt}`, {
+
+  if (result.length === 0) return null;
+
+  // Take shared equipment data from first row
+  const {
+    ID,
+    Name,
+    Status,
+    PurchaseDate,
+    Condition,
+    Type,
+    "Date Available": DateAvailable,
+    Description,
+    Venue,
+    AcademicStaffName,
+    AcademicStaffCitizenID,
+    CurrentUserName,
+  } = result[0];
+
+  // Map chat messages to sender objects
+  const historyComments = Array.from(
+    new Map(
+      result
+        .filter((row) => row.Content !== null)
+        .map((row) => [
+          `${row.Username}-${row.CreateAt}`,
+          {
             userName: row.Username,
             role: row.Role,
             fullName: row.FullName,
             createAt: row.CreateAt,
             content: row.Content,
-          }])
-      ).values()
-    );
+          },
+        ])
+    ).values()
+  );
 
-  
-    return {
-      ID,
-      Name,
-      Status,
-      PurchaseDate,
-      Condition,
-      Type,
-      DateAvailable,
-      Description,
-      Venue,
-      AcademicStaffName,
-      CurrentUserName,
-      historyComments
-    };
+  return {
+    ID,
+    Name,
+    Status,
+    PurchaseDate,
+    Condition,
+    Type,
+    DateAvailable,
+    Description,
+    Venue,
+    AcademicStaffName,
+    AcademicStaffCitizenID,
+    CurrentUserName,
+    historyComments,
   };
+};
 
+const updateEquipmentStatus = async (equipmentID, newStatus) => {
+  return await sql`
+    UPDATE "Production"."Equipment"
+    SET "Status" = ${newStatus}
+    WHERE "ID" = ${equipmentID}
+    RETURNING *;
+    `;
+}
 const queryTest = async () => {
   return await sql`
     SELECT s."SessionID", u."FullName", st."StudentID"
@@ -219,10 +211,19 @@ const queryTest = async () => {
         `;
 };
 
+const getEquipmentNameByID = async (equipmentID) => {
+  const result = await sql`
+    SELECT "Name" FROM "Production"."Equipment"
+    WHERE "ID" = ${equipmentID};
+    `;
+  return result.length > 0 ? result[0].Name : null;
+};
 module.exports = {
   queryAllEquipments,
   queryTest,
   getEquipmentByParticipantCourse,
   queryEquipmentByParticipantCourse,
   getEquipmentDetail,
+  updateEquipmentStatus,
+  getEquipmentNameByID,
 };
