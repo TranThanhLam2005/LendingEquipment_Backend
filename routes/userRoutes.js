@@ -15,6 +15,7 @@ router.get('/query_participant_equipment', middleware.verifySessionMiddleware, e
 router.get('/get_participant_equipment_detail/:equipmentID', middleware.verifySessionMiddleware, equipmentController.getEquipmentDetail);
 router.post('/add_lending_record', middleware.verifySessionMiddleware, lendingController.addLendingRecord);
 router.get('/get_lending_records', middleware.verifySessionMiddleware, lendingController.getLendingRecordsBySessionID);
+router.get('/get_supervise_info', middleware.verifySessionMiddleware, equipmentController.getSuperviseInfoByEquipmentID);
 router.get('/test', equipmentController.test);
 
 // export the router

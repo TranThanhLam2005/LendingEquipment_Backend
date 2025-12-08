@@ -201,6 +201,26 @@ const updateEquipmentStatus = async (equipmentID, newStatus) => {
     RETURNING *;
     `;
 }
+
+const getSuperviseInfoByEquipmentID = async (equipmentID) => {
+  const result = await sql`
+    SELECT
+      "AcademicStaffUser"."FullName" AS "AcademicStaffName",
+      "AcademicStaffUser"."CitizenID" AS "AcademicStaffCitizenID"
+    FROM "Production"."Equipment" 
+    LEFT JOIN "Production"."EquipmentManagement"
+      ON "Equipment"."Name" = "EquipmentManagement"."EquipmentName"
+    LEFT JOIN "Production"."Course"
+      ON "EquipmentManagement"."CourseName" = "Course"."CourseName"
+    LEFT JOIN "Production"."AcademicStaff"
+      ON "Course"."AcademicStaffID" = "AcademicStaff"."StaffID"
+    LEFT JOIN "Production"."User" AS "AcademicStaffUser"
+      ON "AcademicStaff"."CitizenID" = "AcademicStaffUser"."CitizenID"
+    WHERE "Equipment"."ID" = ${equipmentID}
+    `;
+  return result.length > 0 ? result[0] : null;
+}
+
 const queryTest = async () => {
   return await sql`
     SELECT s."SessionID", u."FullName", st."StudentID"
@@ -226,4 +246,5 @@ module.exports = {
   getEquipmentDetail,
   updateEquipmentStatus,
   getEquipmentNameByID,
+  getSuperviseInfoByEquipmentID,
 };

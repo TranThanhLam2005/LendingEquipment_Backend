@@ -53,6 +53,20 @@ const getEquipmentDetail = async (req, res) => {
     }
 }
 
+const getSuperviseInfoByEquipmentID = async (req, res) => {
+    const equipmentID = req.query.equipmentID;
+
+    try {
+        const superviseInfo = await equipmentModel.getSuperviseInfoByEquipmentID(equipmentID);
+        if (!superviseInfo) {
+            return res.status(404).json({ error: 'Supervise info not found' });
+        }
+        res.status(200).json(superviseInfo);
+    } catch (err) {
+        console.error('Error fetching supervise info by equipment ID:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}
 const test = async (req, res) => {
     try {
         const result = await equipmentModel.queryTest();
@@ -69,5 +83,6 @@ module.exports = {
     getEquipmentByParticipantCourse, 
     queryEquipmentByParticipantCourse,
     getEquipmentDetail,
+    getSuperviseInfoByEquipmentID,
     test
 };
