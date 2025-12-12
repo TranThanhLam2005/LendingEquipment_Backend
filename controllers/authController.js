@@ -1,45 +1,52 @@
-const authService = require('../services/authService');
+const authService = require("../services/authService");
 
 const login = async (req, res) => {
-    const { Username, Password } = req.body;
+  const {Username, Password} = req.body;
 
-    // Validate request body
-    if (!Username || !Password) {
-        return res.status(400).json({ error: 'Username and Password are required' });
-    }
+  // Validate request body
+  if (!Username || !Password) {
+    return res.status(400).json({error: "Username and Password are required"});
+  }
 
-    try {
-        const { token, role } = await authService.login(Username, Password);
-        
-        // For dev:
-        res.cookie('token', token, {
-            httpOnly: true,
-            maxAge: 3600 * 1000,
-        });
-          
-        res.status(200).json({role, message: 'Login successful'});
-    } catch (err) {
-        const status = err.statusCode || 500; // Default to 500 if no status code is set
-        return res.status(status).json({ error: err.message });
-    }
+  try {
+    const {token, role} = await authService.login(Username, Password);
+
+    const isProduction = process.env.NODE_ENV === "production";
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      maxAge: 3600 * 1000,
+    });
+
+    res.status(200).json({role, message: "Login successful"});
+  } catch (err) {
+    const status = err.statusCode || 500; // Default to 500 if no status code is set
+    return res.status(status).json({error: err.message});
+  }
 };
 
 const logout = async (req, res) => {
-    const SessionID = req.cookies.token;
+  const SessionID = req.cookies.token;
 
-    // Validate SessionID
-    if (!SessionID) {
-        return res.status(400).json({ error: 'SessionID is required' });
-    }
-    try {
-        await authService.logout(SessionID);
-        res.clearCookie('token');
-        res.status(200).json({ message: 'Logout successful' });
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ error: err.message });
-    }
-}
+  // Validate SessionID
+  if (!SessionID) {
+    return res.status(400).json({error: "SessionID is required"});
+  }
+  try {
+    await authService.logout(SessionID);
+    const isProduction = process.env.NODE_ENV === "production";
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+    });
+    res.status(200).json({message: "Logout successful"});
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({error: err.message});
+  }
+};
 // const register = async (req, res) => {
 //     const { Username, Password, Role } = req.body;
 
@@ -57,21 +64,19 @@ const logout = async (req, res) => {
 //     }
 // };
 const verifySession = async (req, res) => {
-    const SessionID = req.cookies.token;
-    // Validate request body
-    if (!SessionID) {
-        return res.status(400).json({ error: 'SessionID is required' });
-    }
+  const SessionID = req.cookies.token;
+  // Validate request body
+  if (!SessionID) {
+    return res.status(400).json({error: "SessionID is required"});
+  }
 
-    try {
-        await authService.verifySession(SessionID);
-        res.status(200).json({ message: 'Session is valid' });
-    } catch (err) {
-        console.error(err.message);
-        res.status(401).json({ error: err.message });
-    }
+  try {
+    await authService.verifySession(SessionID);
+    res.status(200).json({message: "Session is valid"});
+  } catch (err) {
+    console.error(err.message);
+    res.status(401).json({error: err.message});
+  }
 };
 
-
-
-module.exports = { login, logout, verifySession };
+module.exports = {login, logout, verifySession};
