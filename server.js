@@ -1,12 +1,11 @@
 const http = require("http");
-const { Server } = require("socket.io");
-const app = require('./app');
-const socketHandlers = require('./sockets/index'); 
-const  { parse } = require('cookie');
-
+const {Server} = require("socket.io");
+const app = require("./app");
+const socketHandlers = require("./sockets/index");
+const {parse} = require("cookie");
 
 const PORT = process.env.PORT;
-const HOST = process.env.HOST 
+const HOST = process.env.HOST;
 
 // Create HTTP server from Express app
 const server = http.createServer(app);
@@ -14,7 +13,7 @@ const server = http.createServer(app);
 // Attach socket.io to server
 const io = new Server(server, {
   cors: {
-    origin: "http://192.168.1.126:5173", // or your frontend URL
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
     credentials: true,
   },
 });
@@ -25,12 +24,12 @@ io.on("connection", (socket) => {
   console.log("🔌 New WebSocket connection:", socket.id);
 
   const cookieHeader = socket.handshake.headers.cookie;
-  const cookies = parse(cookieHeader || '');
+  const cookies = parse(cookieHeader || "");
   const sessionID = cookies.token;
 
   socket.sessionID = sessionID;
 
-  socket.on('join-room', (groupID) => {
+  socket.on("join-room", (groupID) => {
     socket.join(groupID);
     console.log(`✅ Socket ${socket.id} joined room ${groupID}`);
   });
@@ -46,8 +45,7 @@ io.on("connection", (socket) => {
   });
 });
 
-
 // Start the HTTP + WebSocket server
-server.listen(PORT, HOST, () => {
-  console.log(`Server running at http://${HOST}:${PORT}`);
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
